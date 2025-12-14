@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Data;
 using TaskManager.Models;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace TaskManagerWebApp.Controllers
+namespace TaskManager.Controllers
 {
     public class TaskItemsController : Controller
     {
@@ -20,9 +17,25 @@ namespace TaskManagerWebApp.Controllers
         }
 
         // GET: TaskItems
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string filter = "all")
         {
-            return View(await _context.TaskItems.ToListAsync());
+            ViewBag.CurrentFilter = filter;
+
+            IQueryable<TaskItem> tasks = _context.TaskItems;
+
+            switch (filter.ToLower())
+            {
+                case "active":
+                    tasks = tasks.Where(t => !t.IsCompleted);
+                    break;
+                case "completed":
+                    tasks = tasks.Where(t => t.IsCompleted);
+                    break;
+                    // "all" or default shows all tasks
+            }
+
+            var taskList = await tasks.OrderByDescending(t => t.CreatedDate).ToListAsync();
+            return View(taskList);
         }
 
         // GET: TaskItems/Create
@@ -32,14 +45,13 @@ namespace TaskManagerWebApp.Controllers
         }
 
         // POST: TaskItems/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Description,IsCompleted,CreatedDate")] TaskItem taskItem)
+        public async Task<IActionResult> Create([Bind("Id,Title,Description,IsCompleted")] TaskItem taskItem)
         {
             if (ModelState.IsValid)
             {
+                taskItem.CreatedDate = DateTime.Now;
                 _context.Add(taskItem);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -64,8 +76,6 @@ namespace TaskManagerWebApp.Controllers
         }
 
         // POST: TaskItems/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,IsCompleted,CreatedDate")] TaskItem taskItem)
@@ -98,6 +108,23 @@ namespace TaskManagerWebApp.Controllers
             return View(taskItem);
         }
 
+        // POST: TaskItems/ToggleComplete/5
+        [HttpPost]
+        public async Task<IActionResult> ToggleComplete(int id)
+        {
+            var taskItem = await _context.TaskItems.FindAsync(id);
+            if (taskItem == null)
+            {
+                return NotFound();
+            }
+
+            taskItem.IsCompleted = !taskItem.IsCompleted;
+            _context.Update(taskItem);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
         // POST: TaskItems/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -107,9 +134,9 @@ namespace TaskManagerWebApp.Controllers
             if (taskItem != null)
             {
                 _context.TaskItems.Remove(taskItem);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
