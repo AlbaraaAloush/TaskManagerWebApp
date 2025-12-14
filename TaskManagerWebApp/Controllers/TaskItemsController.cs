@@ -25,24 +25,6 @@ namespace TaskManagerWebApp.Controllers
             return View(await _context.TaskItems.ToListAsync());
         }
 
-        // GET: TaskItems/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var taskItem = await _context.TaskItems
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (taskItem == null)
-            {
-                return NotFound();
-            }
-
-            return View(taskItem);
-        }
-
         // GET: TaskItems/Create
         public IActionResult Create()
         {
@@ -113,24 +95,6 @@ namespace TaskManagerWebApp.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(taskItem);
-        }
-
-        // GET: TaskItems/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var taskItem = await _context.TaskItems
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (taskItem == null)
-            {
-                return NotFound();
-            }
-
             return View(taskItem);
         }
 
