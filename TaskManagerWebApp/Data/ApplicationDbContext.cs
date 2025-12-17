@@ -9,7 +9,7 @@ namespace TaskManager.Data
             : base(options)
         {
         }
-
+        // database declaration and table name 
         public DbSet<TaskItem> TaskItems { get; set; }
     }
 }

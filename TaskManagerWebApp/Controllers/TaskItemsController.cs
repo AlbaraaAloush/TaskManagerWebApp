@@ -49,23 +49,23 @@ namespace TaskManager.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Title,Description,IsCompleted")] TaskItem taskItem)
         {
+            // model instantiaion and fields assignement is done automatically by ASP.NET
+
             if (ModelState.IsValid)
             {
                 taskItem.CreatedDate = DateTime.Now;
                 _context.Add(taskItem);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index");
             }
+
             return View(taskItem);
+        
         }
 
         // GET: TaskItems/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
 
             var taskItem = await _context.TaskItems.FindAsync(id);
             if (taskItem == null)
@@ -103,7 +103,7 @@ namespace TaskManager.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index");
             }
             return View(taskItem);
         }
@@ -122,7 +122,7 @@ namespace TaskManager.Controllers
             _context.Update(taskItem);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index");
         }
 
         // POST: TaskItems/Delete/5
@@ -137,7 +137,7 @@ namespace TaskManager.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index");
         }
 
         private bool TaskItemExists(int id)

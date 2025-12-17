@@ -5,13 +5,16 @@ namespace TaskManager.Models
 {
     public class TaskItem
     {
+        // Id is auto-incremented by the DB
         public int Id { get; set; }
 
+        // We used these data annotations to validate Title attribute both in client-side and server-side
         [Required]
         [MaxLength(100)]
-        public string Title { get; set; } = string.Empty;
 
-        public string Description { get; set; } = string.Empty;
+        public required string Title { get; set; }
+        // since description is not required, make it nullable to bypass validation
+        public string? Description { get; set; }
 
         public bool IsCompleted { get; set; } = false;
 
