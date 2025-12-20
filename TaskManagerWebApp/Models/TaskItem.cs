@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace TaskManager.Models
+namespace TaskManagerWebApp.Models
 {
     public class TaskItem
     {
@@ -18,6 +18,14 @@ namespace TaskManager.Models
 
         public bool IsCompleted { get; set; } = false;
 
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime CreatedDate { get; set; }
+
+        public enum Priority
+        {
+            Low,
+            High,
+            Medium
+        }
+
     }
 }

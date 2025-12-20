@@ -1,40 +1,40 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TaskManager.Data;
-using TaskManager.Models;
+using TaskManagerWebApp.Data;
+using TaskManagerWebApp.Models;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace TaskManager.Controllers
+namespace TaskManagerWebApp.Controllers
 {
     public class TaskItemsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext context;
 
+        // here we're injecting dependency through constructor
         public TaskItemsController(ApplicationDbContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
         // GET: TaskItems
+
+        // default filter value is all
         public async Task<IActionResult> Index(string filter = "all")
         {
             ViewBag.CurrentFilter = filter;
 
-            IQueryable<TaskItem> tasks = _context.TaskItems;
-
-            switch (filter.ToLower())
+            IQueryable<TaskItem> tasks = context.TaskItems;
+            if(filter == "active")
             {
-                case "active":
-                    tasks = tasks.Where(t => !t.IsCompleted);
-                    break;
-                case "completed":
-                    tasks = tasks.Where(t => t.IsCompleted);
-                    break;
-                    // "all" or default shows all tasks
+                tasks = tasks.Where(t => !t.IsCompleted);
+            } else if(filter == "completed")
+            {
+                tasks = tasks.Where(t => t.IsCompleted);
             }
-
-            var taskList = await tasks.OrderByDescending(t => t.CreatedDate).ToListAsync();
+             
+            // we use async to avoid blocking main thread and let the task execute in background
+           var taskList = await tasks.OrderByDescending(t => t.CreatedDate).ToListAsync();
             return View(taskList);
         }
 
@@ -47,6 +47,8 @@ namespace TaskManager.Controllers
         // POST: TaskItems/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+
+        // Bind() limits binding these data only
         public async Task<IActionResult> Create([Bind("Id,Title,Description,IsCompleted")] TaskItem taskItem)
         {
             // model instantiaion and fields assignement is done automatically by ASP.NET
@@ -54,8 +56,9 @@ namespace TaskManager.Controllers
             if (ModelState.IsValid)
             {
                 taskItem.CreatedDate = DateTime.Now;
-                _context.Add(taskItem);
-                await _context.SaveChangesAsync();
+                context.Add(taskItem);
+                await context.SaveChangesAsync();
+                // we use redirect to prevent duplicate submission when refreshing the page
                 return RedirectToAction("Index");
             }
 
@@ -67,7 +70,7 @@ namespace TaskManager.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
 
-            var taskItem = await _context.TaskItems.FindAsync(id);
+            var taskItem = await context.TaskItems.FindAsync(id);
             if (taskItem == null)
             {
                 return NotFound();
@@ -80,29 +83,13 @@ namespace TaskManager.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,IsCompleted,CreatedDate")] TaskItem taskItem)
         {
-            if (id != taskItem.Id)
-            {
-                return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(taskItem);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TaskItemExists(taskItem.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                    context.Update(taskItem);
+                    await context.SaveChangesAsync();
+               
+               
                 return RedirectToAction("Index");
             }
             return View(taskItem);
@@ -112,15 +99,15 @@ namespace TaskManager.Controllers
         [HttpPost]
         public async Task<IActionResult> ToggleComplete(int id)
         {
-            var taskItem = await _context.TaskItems.FindAsync(id);
+            var taskItem = await context.TaskItems.FindAsync(id);
             if (taskItem == null)
             {
                 return NotFound();
             }
 
             taskItem.IsCompleted = !taskItem.IsCompleted;
-            _context.Update(taskItem);
-            await _context.SaveChangesAsync();
+            context.Update(taskItem);
+            await context.SaveChangesAsync();
 
             return RedirectToAction("Index");
         }
@@ -130,19 +117,15 @@ namespace TaskManager.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var taskItem = await _context.TaskItems.FindAsync(id);
+            var taskItem = await context.TaskItems.FindAsync(id);
             if (taskItem != null)
             {
-                _context.TaskItems.Remove(taskItem);
-                await _context.SaveChangesAsync();
+                context.TaskItems.Remove(taskItem);
+                await context.SaveChangesAsync();
             }
 
             return RedirectToAction("Index");
         }
 
-        private bool TaskItemExists(int id)
-        {
-            return _context.TaskItems.Any(e => e.Id == id);
-        }
     }
 }
