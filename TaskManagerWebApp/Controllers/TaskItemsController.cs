@@ -22,8 +22,9 @@ namespace TaskManagerWebApp.Controllers
         // default filter value is all
         public async Task<IActionResult> Index(string filter = "all")
         {
+            // saves the currently selected filter
             ViewBag.CurrentFilter = filter;
-
+            // deferred execution
             IQueryable<TaskItem> tasks = context.TaskItems;
             if(filter == "active")
             {
@@ -48,8 +49,7 @@ namespace TaskManagerWebApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
 
-        // Bind() limits binding these data only
-        public async Task<IActionResult> Create([Bind("Id,Title,Description,IsCompleted")] TaskItem taskItem)
+        public async Task<IActionResult> Create(TaskItem taskItem)
         {
             // model instantiaion and fields assignement is done automatically by ASP.NET
 
@@ -67,32 +67,23 @@ namespace TaskManagerWebApp.Controllers
         }
 
         // GET: TaskItems/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id)
         {
-
+            // use FindAsync since you're looking for single item by its primary key
             var taskItem = await context.TaskItems.FindAsync(id);
-            if (taskItem == null)
-            {
-                return NotFound();
-            }
             return View(taskItem);
         }
 
         // POST: TaskItems/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,IsCompleted,CreatedDate")] TaskItem taskItem)
+        public async Task<IActionResult> Edit(TaskItem taskItem)
         {
-
-            if (ModelState.IsValid)
-            {
-                    context.Update(taskItem);
-                    await context.SaveChangesAsync();
-               
+                context.Update(taskItem);
+                await context.SaveChangesAsync();
                
                 return RedirectToAction("Index");
-            }
-            return View(taskItem);
+           
         }
 
         // POST: TaskItems/ToggleComplete/5

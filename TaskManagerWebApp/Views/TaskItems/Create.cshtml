@@ -23,6 +23,27 @@
                         </div>
 
                         <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="Priority" class="form-check-input" type="radio" id="flexRadioDefault1" value="@Priority.Low">
+                                <label class="form-check-label" for="flexRadioDefault1">
+                                    Low
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input asp-for="Priority" class="form-check-input" type="radio" id="flexRadioDefault2" value="@Priority.Medium">
+                                <label class="form-check-label" for="flexRadioDefault2">
+                                    Medium
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input asp-for="Priority" class="form-check-input" type="radio" id="flexRadioDefault3" value="@Priority.High">
+                                <label class="form-check-label" for="flexRadioDefault3">
+                                    High
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
                             <label asp-for="Description" class="form-label"></label>
                             <textarea asp-for="Description" class="form-control" rows="4"
                                       placeholder="Enter task description (optional)"></textarea>

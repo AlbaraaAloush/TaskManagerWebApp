@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace TaskManagerWebApp.Models
@@ -20,12 +21,15 @@ namespace TaskManagerWebApp.Models
 
         public DateTime CreatedDate { get; set; }
 
-        public enum Priority
-        {
-            Low,
-            High,
-            Medium
-        }
+        public Priority Priority { get; set; }
 
     }
+
+    public enum Priority
+    {
+        Low,
+        High,
+        Medium
+    }
+
 }

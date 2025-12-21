@@ -12,6 +12,19 @@
         </a>
     </div>
 
+    <div>
+        <form class="form-inline my-2 my-lg-0">
+            <div class="row">
+                <div class="col-6">
+                    <input class="form-control my-3" type="search" placeholder="Search" aria-label="Search">
+                </div>
+                <div class="col-2">
+                    <button class="btn btn-primary my-3" type="submit">Search</button>
+                </div>
+            </div>
+            
+        </form>
+    </div>
     <!-- Filter Tabs -->
     <div class="mb-4">
         <div class="btn-group" role="group">
@@ -30,14 +43,15 @@
         </div>
     </div>
 
-    <!-- Desktop Table View (hidden on mobile) -->
+    <!-- Desktop -->
     <div class="d-none d-md-block">
         <div class="table-responsive">
             <table class="table table-hover">
-                <thead class="table-light">
+                <thead class="table-primary">
                     <tr>
                         <th style="width: 50px;">Status</th>
                         <th>Task</th>
+                        <th>Priority</th>
                         <th style="width: 150px;">Created</th>
                         <th style="width: 120px;">Actions</th>
                     </tr>
@@ -66,6 +80,9 @@
                                     }
                                 </div>
                             </td>
+                            <td>
+                                <p class="fw-bold @(item.Priority == Priority.High ? "text-danger" : item.Priority == Priority.Medium ? "text-warning" : "text-primary")">@item.Priority</p>
+                            </td>
                             <td class="text-muted small">
                                 @item.CreatedDate.ToString("MMM dd, yyyy")
                             </td>
@@ -85,7 +102,7 @@
         </div>
     </div>
 
-    <!-- Mobile Card View (visible on mobile) -->
+    <!-- Mobile -->
     <div class="d-md-none">
         @foreach (var item in Model)
         {
@@ -93,9 +110,11 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox"
-                                   @(item.IsCompleted ? "checked" : "")
-                                   onchange="document.getElementById('toggle-form-@item.Id').submit()">
+                            <form id="toggle-form-@item.Id" asp-action="ToggleComplete" asp-route-id="@item.Id" method="post" class="d-none">
+                                <input class="form-check-input" type="checkbox"
+                                       @(item.IsCompleted ? "checked" : "")>
+                            </form>
+                       
                         </div>
                         <div class="btn-group">
                             <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">
@@ -111,7 +130,9 @@
                     <h5 class="card-title @(item.IsCompleted ? "text-muted text-decoration-line-through" : "")">
                         @Html.DisplayFor(modelItem => item.Title)
                     </h5>
-
+                    <h5>
+                        <p>@item.Priority</p>
+                    </h5>
                     @if (!string.IsNullOrEmpty(item.Description))
                     {
                         <p class="card-text text-muted">@item.Description</p>
@@ -157,10 +178,4 @@
             </div>
         </div>
     </div>
-}
-
-<!-- Hidden form for toggling completion on mobile -->
-@foreach (var item in Model)
-{
-    <form id="toggle-form-@item.Id" asp-action="ToggleComplete" asp-route-id="@item.Id" method="post" class="d-none"></form>
 }

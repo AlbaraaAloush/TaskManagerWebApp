@@ -2,34 +2,47 @@ using Microsoft.EntityFrameworkCore;
 using TaskManagerWebApp.Data;
 using TaskManagerWebApp.Models;
 
+/*
+- Creates the application builder
+-Loads:
+    Configuration (appsettings.json)
+    Environment variables
+    Logging
+    Dependency Injection container
+ */
 var builder = WebApplication.CreateBuilder(args);
 
-
+// Enables controllers, Razor Pages, and Models
 builder.Services.AddControllersWithViews();
 
-// here we add DBContext with in-memory DB
+// Add DBContext with in-memory DB
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseInMemoryDatabase("TaskManagerDb"));
 
+// Cannot add services after this line
 var app = builder.Build();
 
-// HTTP request pipeline
+// HTTP request Middleware pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
+    app.UseHsts(); // Forces HTTPs
 }
 
+// Redirect to HTTPs automatically
 app.UseHttpsRedirection();
+// Enable CSS & JS
 app.UseStaticFiles();
+// Enable routing
 app.UseRouting();
+// Not used in my app
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// seeding initial data for testing
+// Initialize the DB with dummy data
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
