@@ -20,12 +20,24 @@ namespace TaskManagerWebApp.Controllers
         // GET: TaskItems
 
         // default filter value is all
-        public async Task<IActionResult> Index(string filter = "all")
+        public async Task<IActionResult> Index(string filter = "all", string searchString = "")
         {
-            // saves the currently selected filter
+
+            // saves the currently selected filter and search
             ViewBag.CurrentFilter = filter;
+            ViewBag.CurrentSearch = searchString;
+
             // deferred execution
             IQueryable<TaskItem> tasks = context.TaskItems;
+
+            // We apply search first to reduce the dataset 
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                string caseInsesentiveSearch = searchString.ToUpper();
+                tasks = tasks.Where(t => t.Title.ToUpper().Contains(caseInsesentiveSearch) || (t.Description != null && t.Description.ToUpper().Contains(caseInsesentiveSearch)));
+            }
+            
+            // use enum instead for active inactive
             if(filter == "active")
             {
                 tasks = tasks.Where(t => !t.IsCompleted);

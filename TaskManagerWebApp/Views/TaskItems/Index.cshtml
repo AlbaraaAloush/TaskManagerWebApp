@@ -2,6 +2,9 @@
 
 @{
     ViewData["Title"] = "Task Manager";
+    var allActive = ViewBag.CurrentFilter == "all" || ViewBag.CurrentFilter == null ? "active" : "";
+    var activeActive = ViewBag.CurrentFilter == "active" ? "active" : "";
+    var completedActive = ViewBag.CurrentFilter == "completed" ? "active" : "";
 }
 
 <div class="container mt-4">
@@ -13,30 +16,33 @@
     </div>
 
     <div>
-        <form class="form-inline my-2 my-lg-0">
+        @* use get method to preserve search URL and bookmark it if needed *@
+        <form class="form-inline my-2 my-lg-0" asp-controller="TaskItems" asp-action="Index" method="get">
             <div class="row">
-                <div class="col-6">
-                    <input class="form-control my-3" type="search" placeholder="Search" aria-label="Search">
+                <div class="col-8 col-md-6">
+                    <input name="searchString" class="form-control my-3" type="search" placeholder="Search by task title or description..." aria-label="Search" value="@ViewBag.CurrentSearch">
                 </div>
-                <div class="col-2">
-                    <button class="btn btn-primary my-3" type="submit">Search</button>
+                <div class="col-4 col-md-2">
+                    <button class="btn btn-primary my-3" type="submit"><i class="bi bi-search"></i> Search</button>
                 </div>
             </div>
+            @* upon submititng this form, we'll lose the filter value if we don't submit its current value again within the form *@
+            <input type="hidden" name="filter" value="@ViewBag.CurrentFilter" />
             
         </form>
     </div>
     <!-- Filter Tabs -->
     <div class="mb-4">
         <div class="btn-group" role="group">
-            <a asp-action="Index" asp-route-filter="all"
+            <a asp-action="Index" asp-route-filter="all" asp-route-searchString="@ViewBag.CurrentSearch"
                class="btn btn-outline-primary @(ViewBag.CurrentFilter == "all" || ViewBag.CurrentFilter == null ? "active" : "")">
                 All Tasks
             </a>
-            <a asp-action="Index" asp-route-filter="active"
+            <a asp-action="Index" asp-route-filter="active" asp-route-searchString="@ViewBag.CurrentSearch"
                class="btn btn-outline-primary @(ViewBag.CurrentFilter == "active" ? "active" : "")">
                 Active
             </a>
-            <a asp-action="Index" asp-route-filter="completed"
+            <a asp-action="Index" asp-route-filter="completed" asp-route-searchString="@ViewBag.CurrentSearch"
                class="btn btn-outline-primary @(ViewBag.CurrentFilter == "completed" ? "active" : "")">
                 Completed
             </a>
@@ -151,7 +157,6 @@
         <div class="text-center py-5">
             <i class="bi bi-check2-circle display-1 text-muted"></i>
             <h3 class="mt-3">No tasks found</h3>
-            <p class="text-muted">Add your first task by clicking "Add New Task"</p>
         </div>
     }
 </div>

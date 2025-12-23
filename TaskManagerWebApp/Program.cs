@@ -22,13 +22,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Cannot add services after this line
 var app = builder.Build();
 
-// HTTP request Middleware pipeline
+// HTTP request Middleware pipeline for handling exceptions
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts(); // Forces HTTPs
 }
-
 // Redirect to HTTPs automatically
 app.UseHttpsRedirection();
 // Enable CSS & JS
@@ -54,8 +53,42 @@ using (var scope = app.Services.CreateScope())
     {
         context.TaskItems.AddRange(
             new TaskItem { Title = "Learn ASP.NET Core MVC", Description = "Complete the Task Manager project", CreatedDate = DateTime.Now.AddDays(-2) },
-            new TaskItem { Title = "Breakfast with Colleagues", Description = "Milk, Eggs, Bread", IsCompleted = true, CreatedDate = DateTime.Now.AddDays(-1) },
+            new TaskItem { Title = "Breakfast with Colleagues", Description = "One pancake for Hamid", IsCompleted = true, CreatedDate = DateTime.Now.AddDays(-1) },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
+            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
             new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now }
+
         );
         context.SaveChanges();
     }
