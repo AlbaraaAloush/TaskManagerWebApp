@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TaskManagerWebApp.Data;
-using TaskManagerWebApp.Models;
 using System.Linq;
 using System.Threading.Tasks;
+using TaskManagerWebApp.Data;
+using TaskManagerWebApp.Models;
+using TaskManagerWebApp.ViewModels;
 
 namespace TaskManagerWebApp.Controllers
 {
@@ -20,37 +21,101 @@ namespace TaskManagerWebApp.Controllers
         // GET: TaskItems
 
         // default filter value is all
-        public async Task<IActionResult> Index(string filter = "all", string searchString = "")
+        public async Task<IActionResult> Index(string filter = "all", string searchString = "", int pageNumber = 1, int pageSize = 5)
         {
+            // Prevent user from inputting pagenumber less than 1
+            if (pageNumber < 1) pageNumber = 1;
 
-            // saves the currently selected filter and search
-            ViewBag.CurrentFilter = filter;
-            ViewBag.CurrentSearch = searchString;
+            // Build the query (deferred execution)
+            IQueryable<TaskItem> tasksQuery = context.TaskItems;
 
-            // deferred execution
-            IQueryable<TaskItem> tasks = context.TaskItems;
-
-            // We apply search first to reduce the dataset 
-            if (!String.IsNullOrEmpty(searchString))
+            // Reduce the dataset first then apply pagination
+            // Apply search filter if provided
+            if (!string.IsNullOrEmpty(searchString))
             {
-                string caseInsesentiveSearch = searchString.ToUpper();
-                tasks = tasks.Where(t => t.Title.ToUpper().Contains(caseInsesentiveSearch) || (t.Description != null && t.Description.ToUpper().Contains(caseInsesentiveSearch)));
+                string caseInsensitiveSearch = searchString.ToUpper();
+                tasksQuery = tasksQuery.Where(t =>
+                    t.Title.ToUpper().Contains(caseInsensitiveSearch) ||
+                    (t.Description != null && t.Description.ToUpper().Contains(caseInsensitiveSearch)));
             }
-            
-            // use enum instead for active inactive
-            if(filter == "active")
+
+            // Apply completion filter
+            switch (filter.ToLower())
             {
-                tasks = tasks.Where(t => !t.IsCompleted);
-            } else if(filter == "completed")
-            {
-                tasks = tasks.Where(t => t.IsCompleted);
+                case "active":
+                    tasksQuery = tasksQuery.Where(t => !t.IsCompleted);
+                    break;
+                case "completed":
+                    tasksQuery = tasksQuery.Where(t => t.IsCompleted);
+                    break;
+                    // "all" shows everything
             }
-             
-            // we use async to avoid blocking main thread and let the task execute in background
-           var taskList = await tasks.OrderByDescending(t => t.CreatedDate).ToListAsync();
-            return View(taskList);
+
+            // Get total count BEFORE pagination
+            int totalItems = await tasksQuery.CountAsync();
+
+            // Calculate total pages
+            int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            // Ensure page number is valid
+            if (pageNumber > totalPages && totalPages > 0)
+                pageNumber = totalPages;
+
+            // Apply pagination (skip and take)
+            var pagedTasks = await tasksQuery
+                .OrderByDescending(t => t.CreatedDate)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // Generate page numbers for display (e.g., [1, 2, 3, 4, 5])
+            var pageNumbers = GeneratePageNumbers(pageNumber, totalPages);
+
+            // Create and populate ViewModel
+            var viewModel = new PaginatedTasksViewModel<TaskItem>
+            {
+                Tasks = pagedTasks,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                Filter = filter,
+                SearchString = searchString,
+                PageNumbers = pageNumbers
+            };
+
+            return View(viewModel);
         }
 
+        // Helper method to generate page numbers
+        private List<int> GeneratePageNumbers(int currentPage, int totalPages, int maxPagesToShow = 5)
+        {
+            var pageNumbers = new List<int>();
+
+            if (totalPages <= maxPagesToShow)
+            {
+                // Show all pages if we have 5 or fewer
+                for (int i = 1; i <= totalPages; i++)
+                    pageNumbers.Add(i);
+            }
+            else
+            {
+                // Show a window of pages around current page
+                int startPage = Math.Max(1, currentPage - (maxPagesToShow / 2));
+                int endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
+
+                // Adjust if we're near the beginning or end
+                if (endPage - startPage + 1 < maxPagesToShow)
+                {
+                    startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+                }
+
+                for (int i = startPage; i <= endPage; i++)
+                    pageNumbers.Add(i);
+            }
+
+            return pageNumbers;
+        }
         // GET: TaskItems/Create
         public IActionResult Create()
         {
@@ -118,7 +183,7 @@ namespace TaskManagerWebApp.Controllers
         // POST: TaskItems/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, string currentFilter, string currentSearchString, int currentPageNumber,int currentPageSize)
         {
             var taskItem = await context.TaskItems.FindAsync(id);
             if (taskItem != null)
@@ -127,7 +192,13 @@ namespace TaskManagerWebApp.Controllers
                 await context.SaveChangesAsync();
             }
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", new PaginatedTasksViewModel<TaskItem>
+            {
+                Filter = currentFilter,
+                SearchString = currentSearchString,
+                PageNumber = currentPageNumber,
+                PageSize = currentPageSize
+            });
         }
 
     }

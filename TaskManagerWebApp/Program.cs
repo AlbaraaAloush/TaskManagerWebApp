@@ -15,9 +15,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Enables controllers, Razor Pages, and Models
 builder.Services.AddControllersWithViews();
 
-// Add DBContext with in-memory DB
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseInMemoryDatabase("TaskManagerDb"));
+{
+    options.UseInMemoryDatabase("TaskManagerDb")
+           .LogTo(Console.WriteLine, LogLevel.Information); 
+});
 
 // Cannot add services after this line
 var app = builder.Build();
@@ -42,54 +44,34 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 // Initialize the DB with dummy data
+// Seed initial data
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
+    // Clear existing data
     context.Database.EnsureDeleted();
     context.Database.EnsureCreated();
 
+    // Add sample tasks
     if (!context.TaskItems.Any())
     {
-        context.TaskItems.AddRange(
-            new TaskItem { Title = "Learn ASP.NET Core MVC", Description = "Complete the Task Manager project", CreatedDate = DateTime.Now.AddDays(-2) },
-            new TaskItem { Title = "Breakfast with Colleagues", Description = "One pancake for Hamid", IsCompleted = true, CreatedDate = DateTime.Now.AddDays(-1) },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now },
-            new TaskItem { Title = "Present Demo to Waddah", CreatedDate = DateTime.Now }
+        var tasks = new List<TaskItem>();
 
-        );
+        // Create 25 sample tasks
+        for (int i = 1; i <= 25; i++)
+        {
+            tasks.Add(new TaskItem
+            {
+                Title = $"Task {i}: Learn ASP.NET Core feature {i}",
+                Description = i % 2 == 0 ? $"Detailed description for task {i}" : null,
+                IsCompleted = i % 3 == 0, // Every 3rd task completed
+                CreatedDate = DateTime.Now.AddDays(-i),
+                Priority = (Priority)(i % 3) // Cycle through Low, High, Medium
+            });
+        }
+
+        context.TaskItems.AddRange(tasks);
         context.SaveChanges();
     }
 }
