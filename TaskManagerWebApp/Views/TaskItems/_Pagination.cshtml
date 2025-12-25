@@ -1,0 +1,49 @@
+﻿@model TaskManagerWebApp.ViewModels.PaginatedTasksViewModel<TaskItem>
+
+@if (Model.TotalPages > 1)
+{
+    <nav aria-label="Task pagination">
+        <ul class="pagination justify-content-center">
+            <!-- Previous Page Button -->
+            <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-pageNumber="@(Model.PageNumber - 1)"
+                   asp-route-pageSize="@Model.PageSize"
+                   asp-route-filter="@Model.Filter"
+                   asp-route-searchString="@Model.SearchString"
+                   aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+
+            <!-- Page Number Buttons -->
+            @foreach (var pageNum in Model.PageNumbers)
+            {
+                <li class="page-item @(pageNum == Model.PageNumber ? "active" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-pageNumber="@pageNum"
+                       asp-route-pageSize="@Model.PageSize"
+                       asp-route-filter="@Model.Filter"
+                       asp-route-searchString="@Model.SearchString">
+                        @pageNum
+                    </a>
+                </li>
+            }
+
+            <!-- Next Page Button -->
+            <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-pageNumber="@(Model.PageNumber + 1)"
+                   asp-route-pageSize="@Model.PageSize"
+                   asp-route-filter="@Model.Filter"
+                   asp-route-searchString="@Model.SearchString"
+                   aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+}
