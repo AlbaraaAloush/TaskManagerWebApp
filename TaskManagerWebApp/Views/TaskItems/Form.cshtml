@@ -1,7 +1,12 @@
 ﻿@model TaskManagerWebApp.Models.TaskItem
 
 @{
-    ViewData["Title"] = "Edit Task";
+    bool isCreate = Model.Id == 0;
+    string pageTitle = isCreate ? "Create New Task" : $"Edit Task: {Model.Title}";
+    string submitText = isCreate ? "Create Task" : "Save changes";
+    string submitICon = isCreate ? "bi-plus-circle" : "bi-save";
+    string actionMethod = isCreate? "Create" : "Edit";
+    ViewData["Title"] = pageTitle;
 }
 
 <div class="container mt-4">
@@ -9,52 +14,58 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h2 class="h5 mb-0">Edit Task</h2>
+                    <h2 class="h5 mb-0">@pageTitle</h2>
                 </div>
                 <div class="card-body">
-                    <form asp-action="Edit">
+                    <form asp-action= "@actionMethod" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                        <input type="hidden" asp-for="Id" />
-                        <input type="hidden" asp-for="CreatedDate" />
-
+                        @* if we're editing, then we need to pass the below parameters to preserve their value *@
+                        @if (!isCreate)
+                        {
+                            <input type="hidden" asp-for="Id" />
+                            <input type="hidden" asp-for="CreatedDate" />
+                        }
                         <div class="mb-3">
                             <label asp-for="Title" class="form-label"></label>
-                            <input asp-for="Title" class="form-control"/>
+                            <input asp-for="Title" class="form-control" placeholder="Enter task title" />
                             <span asp-validation-for="Title" class="text-danger"></span>
                             <div class="form-text">Maximum 100 characters</div>
                         </div>
 
                         <div class="mb-3">
+                            <label class="form-label">Priority</label>
                             <div class="form-check">
-                                <input asp-for="Priority" class="form-check-input" type="radio" id="flexRadioDefault1" value="@Priority.Low">
+                                <input asp-for="Priority" name="Priority" class="form-check-input" type="radio" id="priorityLow" value="@Priority.Low" checked="@(Model.Priority == Priority.Low)">
                                 <label class="form-check-label" for="flexRadioDefault1">
                                     Low
                                 </label>
                             </div>
                             <div class="form-check">
-                                <input asp-for="Priority" class="form-check-input" type="radio" id="flexRadioDefault2" value="@Priority.Medium">
+                                <input asp-for="Priority" name="Priority" class="form-check-input" type="radio" id="priorityMedium" value="@Priority.Medium" checked="@(Model.Priority == Priority.Medium)">
                                 <label class="form-check-label" for="flexRadioDefault2">
                                     Medium
                                 </label>
                             </div>
                             <div class="form-check">
-                                <input asp-for="Priority" class="form-check-input" type="radio" id="flexRadioDefault3" value="@Priority.High">
+                                <input asp-for="Priority" name="Priority" class="form-check-input" type="radio" id="PriorityHigh" value="@Priority.High" checked="@(Model.Priority == Priority.High)">
                                 <label class="form-check-label" for="flexRadioDefault3">
                                     High
                                 </label>
                             </div>
+                            <span asp-validation-for="Priority" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="Description" class="form-label"></label>
-                            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                            <textarea asp-for="Description" class="form-control" rows="4"
+                                      placeholder="Enter task description (optional)"></textarea>
                             <span asp-validation-for="Description" class="text-danger"></span>
                         </div>
 
                         <div class="d-flex justify-content-between">
                             <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save"></i> Save Changes
+                            <button type="submit" class="btn btn-primary"> @(isCreate? "Add Task" : "Save Changes")
+                                <i class="@submitICon"></i>
                             </button>
                         </div>
                     </form>

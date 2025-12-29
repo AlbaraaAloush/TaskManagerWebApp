@@ -21,7 +21,7 @@ namespace TaskManagerWebApp.Models
 
         public DateTime CreatedDate { get; set; }
 
-        public Priority Priority { get; set; }
+        public Priority Priority { get; set; } = Priority.Medium;
 
     }
 

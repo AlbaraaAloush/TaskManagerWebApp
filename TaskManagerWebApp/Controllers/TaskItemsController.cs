@@ -74,7 +74,7 @@ namespace TaskManagerWebApp.Controllers
             // Create and populate ViewModel
             var viewModel = new PaginatedTasksViewModel<TaskItem>
             {
-                Tasks = pagedTasks,
+                Data = pagedTasks,
                 PageNumber = pageNumber,
                 PageSize = pageSize,
                 TotalItems = totalItems,
@@ -119,7 +119,7 @@ namespace TaskManagerWebApp.Controllers
         // GET: TaskItems/Create
         public IActionResult Create()
         {
-            return View();
+            return View("Form", new TaskItem{ Title = ""});
         }
 
         // POST: TaskItems/Create
@@ -148,7 +148,11 @@ namespace TaskManagerWebApp.Controllers
         {
             // use FindAsync since you're looking for single item by its primary key
             var taskItem = await context.TaskItems.FindAsync(id);
-            return View(taskItem);
+
+            if (taskItem == null)
+                return NotFound();
+
+            return View("Form", taskItem);
         }
 
         // POST: TaskItems/Edit/5
@@ -192,7 +196,7 @@ namespace TaskManagerWebApp.Controllers
                 await context.SaveChangesAsync();
             }
 
-            return RedirectToAction("Index", new PaginatedTasksViewModel<TaskItem>
+            return RedirectToAction("Index", new
             {
                 Filter = currentFilter,
                 SearchString = currentSearchString,
