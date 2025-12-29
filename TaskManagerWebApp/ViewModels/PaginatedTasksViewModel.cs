@@ -8,7 +8,7 @@ namespace TaskManagerWebApp.ViewModels
     public class PaginatedTasksViewModel<T>
     {
         // We will hold tasks for the current page only
-        public List<T> Tasks { get; set; } = new List<T>();
+        public List<T> Data { get; set; } = new List<T>();
 
         // Current page number (starts at 1)
         public int PageNumber { get; set; } = 1;

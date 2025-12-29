@@ -115,7 +115,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model.Tasks)
+                    @foreach (var item in Model.Data)
                     {
                         <tr>
                             <td>
@@ -162,7 +162,7 @@
 
     <!-- Mobile -->
     <div class="d-md-none">
-        @foreach (var item in Model.Tasks)
+        @foreach (var item in Model.Data)
         {
             <div class="card mb-3">
                 <div class="card-body">
@@ -204,7 +204,7 @@
         }
     </div>
 
-    @if (!Model.Tasks.Any())
+    @if (!Model.Data.Any())
     {
         <div class="text-center py-5">
             <i class="bi bi-check2-circle display-1 text-muted"></i>
@@ -232,7 +232,7 @@
 </div>
 
 <!-- Delete Modals -->
-@foreach (var item in Model.Tasks)
+@foreach (var item in Model.Data)
 {
     <div class="modal fade" id="deleteModal-@item.Id" tabindex="-1">
         <div class="modal-dialog">
