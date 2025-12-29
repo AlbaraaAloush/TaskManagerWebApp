@@ -17,7 +17,7 @@
                     <h2 class="h5 mb-0">@pageTitle</h2>
                 </div>
                 <div class="card-body">
-                    <form asp-action= "@actionMethod" method="post">
+                    <form asp-action= "Form" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         @* if we're editing, then we need to pass the below parameters to preserve their value *@
                         @if (!isCreate)
