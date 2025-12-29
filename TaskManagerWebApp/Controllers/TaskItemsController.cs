@@ -116,55 +116,49 @@ namespace TaskManagerWebApp.Controllers
 
             return pageNumbers;
         }
-        // GET: TaskItems/Create
-        public IActionResult Create()
+
+        // GET: TaskItems/Upsert
+        public async Task<IActionResult> Form(int? id)
         {
-            return View("Form", new TaskItem{ Title = ""});
+            if(id is null || id == 0)
+            {
+                return View("Form", new TaskItem { Title = "" });
+            }
+            else
+            {
+                // use FindAsync since you're looking for single item by its primary key
+                var taskItem = await context.TaskItems.FindAsync(id);
+
+                if (taskItem == null)
+                    return NotFound();
+
+                return View(taskItem);
+            }
         }
 
-        // POST: TaskItems/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-
-        public async Task<IActionResult> Create(TaskItem taskItem)
+        public async Task<IActionResult> Form(TaskItem taskItem)
         {
-            // model instantiaion and fields assignement is done automatically by ASP.NET
-
             if (ModelState.IsValid)
             {
-                taskItem.CreatedDate = DateTime.Now;
-                context.Add(taskItem);
-                await context.SaveChangesAsync();
-                // we use redirect to prevent duplicate submission when refreshing the page
-                return RedirectToAction("Index");
+                if(taskItem.Id == 0)
+                {
+                    taskItem.CreatedDate = DateTime.Now;
+                    context.Add(taskItem);
+                    await context.SaveChangesAsync();
+                    // we use redirect to prevent duplicate submission when refreshing the page
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    context.Update(taskItem);
+                    await context.SaveChangesAsync();
+
+                    return RedirectToAction("Index");
+                }
             }
-
             return View(taskItem);
-        
-        }
-
-        // GET: TaskItems/Edit/5
-        public async Task<IActionResult> Edit(int id)
-        {
-            // use FindAsync since you're looking for single item by its primary key
-            var taskItem = await context.TaskItems.FindAsync(id);
-
-            if (taskItem == null)
-                return NotFound();
-
-            return View("Form", taskItem);
-        }
-
-        // POST: TaskItems/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(TaskItem taskItem)
-        {
-                context.Update(taskItem);
-                await context.SaveChangesAsync();
-               
-                return RedirectToAction("Index");
-           
         }
 
         // POST: TaskItems/ToggleComplete/5
